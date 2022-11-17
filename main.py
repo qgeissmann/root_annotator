@@ -72,7 +72,11 @@ if __name__ == '__main__':
                 c = contours[i]
                 canvas = np.copy(im)
                 current_group = groups[i]
+
+
                 cv2.drawContours(canvas, [c], 0, PALLET[current_group], -1)
+
+
                 canvas = cv2.resize(canvas, DISPLAY_SIZE)
                 cv2.imshow("window", canvas)
                 k = cv2.waitKey(-1)
@@ -98,7 +102,16 @@ if __name__ == '__main__':
             validated = display_results(im, groups, contours, final=True)
         logging.info(f"Done with {os.path.basename(f)}. Saving {output_file}")
         output = np.zeros_like(im)
+
+        # this is where we map each instance as a different colour
         for g, c in zip(groups, contours):
             cv2.drawContours(output, [c], 0, PALLET[g], -1)
         cv2.imwrite(output_file, output)
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+        # alternatively, we can just save multiple files:
+
+        for g, c in zip(groups, contours):
+            output = np.zeros_like(im)
+            output_instance_file = os.path.splitext(f)[0] + f"-instance_{g}.png"
+            cv2.drawContours(output, [c], 0, (255,255,255), -1)
+            cv2.imwrite(output_instance_file, output)
