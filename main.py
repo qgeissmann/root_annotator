@@ -14,12 +14,14 @@ DISPLAY_SIZE = (1750 // 4, 3100 // 4)
 BACK_KEY = 52
 FORWARD_KEY = 54
 SKIP_KEY = 8  # i.e. backspace
-
-KEY_GROUP_MAP = {49: 1, 50: 2, 51: 3}
+BG_GROUP = 5
+KEY_GROUP_MAP = {49: 1, 50: 2, 51: 3, 53: 5}
 PALLET = {0: (255, 255, 0),
           1: (255, 0, 0),
           2: (0, 255, 0),
-          3: (0, 0, 255)}
+          3: (0, 0, 255),
+          5: (0, 255, 255)
+          }
 ENTER_KEY = 13
 ESC_KEY = 27
 MIN_CONTOUR_AREA = 100
@@ -120,13 +122,15 @@ if __name__ == '__main__':
 
         # this is where we map each instance as a different colour
         for g, c in zip(groups, contours):
-            cv2.drawContours(output, [c], 0, PALLET[g], -1)
+            if g != BG_GROUP:
+                cv2.drawContours(output, [c], 0, PALLET[g], -1)
         cv2.imwrite(output_file, output)
 
         # alternatively, we can just save multiple files:
 
         for g, c in zip(groups, contours):
-            output = np.zeros_like(im)
-            output_instance_file = os.path.splitext(f)[0] + f"-instance_{g}.png"
-            cv2.drawContours(output, [c], 0, (255,255,255), -1)
-            cv2.imwrite(output_instance_file, output)
+            if g != BG_GROUP:
+                output = np.zeros_like(im)
+                output_instance_file = os.path.splitext(f)[0] + f"-instance_{g}.png"
+                cv2.drawContours(output, [c], 0, (255,255,255), -1)
+                cv2.imwrite(output_instance_file, output)
