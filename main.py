@@ -26,7 +26,8 @@ ENTER_KEY = 13
 ESC_KEY = 27
 MIN_CONTOUR_AREA = 100
 
-def display_results(image, groups, contours, final = False):
+
+def display_results(image, groups, contours, final=False):
     im_cp = np.copy(image)
     for g, c in zip(groups, contours):
         cv2.drawContours(im_cp, [c], 0, PALLET[g], -1)
@@ -47,8 +48,6 @@ def display_results(image, groups, contours, final = False):
         cv2.waitKey(1)
 
 
-
-
 if __name__ == '__main__':
 
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
@@ -60,7 +59,6 @@ if __name__ == '__main__':
         if (os.path.exists(output_file) or os.path.exists(skipped_file)) and not FORCE:
             logging.info(f"Skipping {os.path.basename(output_file)}")
             continue
-
 
         mask = 255 - cv2.cvtColor(cv2.imread(mask_file), cv2.COLOR_BGR2GRAY)
         contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -128,9 +126,16 @@ if __name__ == '__main__':
 
         # alternatively, we can just save multiple files:
 
+        group_contours = {}
         for g, c in zip(groups, contours):
             if g != BG_GROUP:
-                output = np.zeros_like(im)
-                output_instance_file = os.path.splitext(f)[0] + f"-instance_{g}.png"
-                cv2.drawContours(output, [c], 0, (255,255,255), -1)
-                cv2.imwrite(output_instance_file, output)
+                if g not in group_contours:
+                    group_contours[g] = []
+                group_contours[g].append(c)
+
+        for g, conts in group_contours.items():
+            print(g, len(conts))
+            output = np.zeros_like(im)
+            output_instance_file = os.path.splitext(f)[0] + f"-instance_{g}.png"
+            cv2.drawContours(output, conts, -1, (255, 255, 255), -1)
+            cv2.imwrite(output_instance_file, output)
